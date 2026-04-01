@@ -409,7 +409,7 @@ function renderReviewList() {
             </div>
             <div class="group-expand-list" style="display:none; margin:8px 0; background:rgba(255,255,255,0.05); border-radius:4px; padding:8px;">
                ${l.layers.map((child:any) => `
-                 <div style="font-size:10px; color:var(--text-muted); padding:2px 0;">
+                 <div class="group-child-row" data-id="${child.nodeId}" style="font-size:10px; color:var(--text-muted); padding:4px 0; cursor:pointer; display:flex; justify-content:space-between;">
                     <span style="font-family:var(--font-mono);">${child.parentComponentName || child.layerName}</span> 
                     <span style="opacity:0.5; margin-left:4px;">${child.frameName || ''}</span>
                  </div>
@@ -665,13 +665,31 @@ function attachListeners(id:string) {
 
   if (id === 'S6') {
      // Focus layer on row click (but NOT when clicking inputs or buttons)
-     app.querySelectorAll('.item-row[data-id]').forEach((row: any) => {
+     app.querySelectorAll('.item-row[data-id], .group-row').forEach((row: any) => {
         row.addEventListener('click', (e: any) => {
-           if (e.target.closest('button') || e.target.closest('input')) return;
+           if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.group-child-row')) return;
+           
+           if (row.classList.contains('group-row')) {
+              // For groups, focus ALL matching layers to show breadth
+              const g = scanData.groupedLayers.find((group:any) => group.text === row.querySelector('.layer-name').innerText);
+              if (g && g.layers.length > 0) {
+                 postMessage({ type: 'FOCUS_LAYER', nodeId: g.layers[0].nodeId }); // Focus first one
+              }
+           } else {
+              const nodeId = row.getAttribute('data-id');
+              if (nodeId) postMessage({ type: 'FOCUS_LAYER', nodeId });
+           }
+        });
+        row.style.cursor = 'pointer';
+     });
+
+     // Focus specific child in a group expand list
+     app.querySelectorAll('.group-child-row').forEach((row: any) => {
+        row.addEventListener('click', (e: any) => {
+           e.stopPropagation();
            const nodeId = row.getAttribute('data-id');
            if (nodeId) postMessage({ type: 'FOCUS_LAYER', nodeId });
         });
-        row.style.cursor = 'pointer';
      });
 
      app.querySelectorAll('.key-input').forEach((input: any) => {
