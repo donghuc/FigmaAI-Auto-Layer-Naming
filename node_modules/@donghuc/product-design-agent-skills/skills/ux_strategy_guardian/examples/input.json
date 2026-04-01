@@ -1,0 +1,29 @@
+{
+  "skill": "ux_strategy_guardian",
+  "inputs": {
+    "product_foundation": {
+      "product_vision": "Create a consumer-friendly, non-technical link checking tool that protects families from phishing scams.",
+      "ux_strategy": "Prioritize speed, zero-setup onboarding, and extremely clear, color-coded risk indicators. Focus on trust and privacy.",
+      "product_principles": "Privacy first, Clarity over Cleverness, Actionable Alerts",
+      "privacy_strategy": "No link logging or continuous background tracking."
+    },
+    "design_system_rules": {
+      "system_name": "SafeNest Design System",
+      "component_rules": "Use the standard 'AlertCard' for all threat detections. Buttons must be explicitly labeled.",
+      "layout_rules": "Maintain a single-column layout on mobile to reduce cognitive load.",
+      "token_rules": "Color semantics: Deep Red for High Risk, Yellow for Warnings, Green for Safe."
+    },
+    "project_context": {
+      "product": "LetMeCheck App",
+      "feature": "Scan Results Page",
+      "platform": "Mobile Web",
+      "target_users": "Non-technical family members, older adults",
+      "design_goal": "Clearly communicate that a link is dangerous and instruct the user on what to do next."
+    },
+    "proposal": {
+      "ux_flow": "User pastes link -> presses check -> tool scans link -> returns 'Dangerous Link Detected' page with 'High Risk' badge and explains why.",
+      "ui_structure": "A card showing the verdict, followed by cards explaining reasons like 'New Website' and 'Broken Security', but no definitive action button at the bottom.",
+      "interactions": "Static read-only report."
+    }
+  }
+}

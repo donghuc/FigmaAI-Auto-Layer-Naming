@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AINaming Plugin</title>
+  <script type="module" crossorigin>var e=(e,t)=>()=>(e&&(t=e(e=0)),t),t=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports);(function(){let e=document.createElement(`link`).relList;if(e&&e.supports&&e.supports(`modulepreload`))return;for(let e of document.querySelectorAll(`link[rel="modulepreload"]`))n(e);new MutationObserver(e=>{for(let t of e)if(t.type===`childList`)for(let e of t.addedNodes)e.tagName===`LINK`&&e.rel===`modulepreload`&&n(e)}).observe(document,{childList:!0,subtree:!0});function t(e){let t={};return e.integrity&&(t.integrity=e.integrity),e.referrerPolicy&&(t.referrerPolicy=e.referrerPolicy),e.crossOrigin===`use-credentials`?t.credentials=`include`:e.crossOrigin===`anonymous`?t.credentials=`omit`:t.credentials=`same-origin`,t}function n(e){if(e.ep)return;e.ep=!0;let n=t(e);fetch(e.href,n)}})();function n(e){let t=e.split(`.`);if(t.length<2)return{valid:!1,error:`Key needs at least 2 segments (feature.semantic)`};if(t.length>5)return{valid:!1,error:`Key cannot exceed 5 segments`};for(let e of t){if(e.length===0)return{valid:!1,error:`Empty segment — check for double dots`};if(/[A-Z]/.test(e))return{valid:!1,error:`Use lowercase only — no uppercase letters`};if(/[^a-z0-9_]/.test(e))return{valid:!1,error:`Use dots between segments, underscores within segments only`};if(e.startsWith(`_`)||e.endsWith(`_`))return{valid:!1,error:`Segments cannot start or end with underscore`}}return{valid:!0}}function r(e){return e.split(`.`).flatMap(e=>e.split(`_`)).filter(Boolean)}function i(e,t){let n=r(e),i=r(t);return n.length===i.length?n.every((e,t)=>e===i[t]):!1}function a(e,t){let n=[...e,...t.map(e=>({nodeId:`hidden`,key:e}))],r=new Set;for(let e=0;e<n.length;e++)for(let t=e+1;t<n.length;t++)n[e].key&&n[t].key&&i(n[e].key,n[t].key)&&(n[e].nodeId!==`hidden`&&r.add(n[e].nodeId),n[t].nodeId!==`hidden`&&r.add(n[t].nodeId));return r}var o=e((()=>{}));async function s(e,t){try{if(e===`openai`)return(await fetch(`https://api.openai.com/v1/models`,{headers:{Authorization:`Bearer ${t}`}})).status===200;{let e=await fetch(`https://api.anthropic.com/v1/messages`,{method:`POST`,headers:{"x-api-key":t,"anthropic-version":`2023-06-01`,"Content-Type":`application/json`,"anthropic-dangerously-allow-browser":`true`},body:JSON.stringify({model:`claude-3-5-sonnet-20240620`,max_tokens:1,messages:[{role:`user`,content:`test`}]})});return e.status!==401&&e.status!==403}}catch{return!1}}async function c(e,t,n){return u(e,t,n,p,e=>({nodeId:e.nodeId,text:e.text,frame:e.frameName}),`Classifying layers`)}async function l(e,t,n){return u(e,t,n,m,e=>({nodeId:e.nodeId,text:e.text,frameName:e.frameName,parentComponentName:e.parentComponentName,positionInHierarchy:e.positionInHierarchy,confirmedFeature:e.confirmedFeature||`unknown`,confirmedScreen:e.confirmedScreen||null}),`Suggesting keys`)}async function u(e,t,n,r,i,a){let o=[];for(let s=0;s<e.length;s+=50){let c=e.slice(s,s+50),l=JSON.stringify(c.map(i)),u=Math.floor(s/50)+1,f=Math.ceil(e.length/50);parent.postMessage({pluginMessage:{type:`PROGRESS_UPDATE`,phase:a,progress:`Batch ${u} of ${f}`}},`*`);try{if(t===`openai`){let e=await fetch(`https://api.openai.com/v1/chat/completions`,{method:`POST`,headers:{Authorization:`Bearer ${n}`,"Content-Type":`application/json`},body:JSON.stringify({model:`gpt-4o`,messages:[{role:`system`,content:r},{role:`user`,content:l}],temperature:.1,response_format:{type:`json_object`}})});if(!e.ok)throw Error(e.status+``);let t=(await e.json()).choices[0].message.content;o.push(...d(t))}else{let e=await fetch(`https://api.anthropic.com/v1/messages`,{method:`POST`,headers:{"x-api-key":n,"anthropic-version":`2023-06-01`,"Content-Type":`application/json`,"anthropic-dangerously-allow-browser":`true`},body:JSON.stringify({model:`claude-3-5-sonnet-20240620`,max_tokens:2048,temperature:.1,system:r,messages:[{role:`user`,content:l}]})});if(!e.ok)throw Error(e.status+``);let t=(await e.json()).content?.[0]?.text||`[]`;o.push(...d(t))}}catch(e){throw console.error(`AI call failed`,e),e}}return o}function d(e){try{let t=JSON.parse(e);if(!Array.isArray(t)){if(t.data&&Array.isArray(t.data))return t.data;let e=Object.keys(t);for(let n of e)if(Array.isArray(t[n]))return t[n];return[t]}return t}catch{let t=e.match(/\[[\s\S]*\]/);if(t)try{return JSON.parse(t[0])}catch{}throw Error(`AI JSON parsing failed`)}}function f(e,t){let n=(t.suffix||t.suggestedKey||``).trim().toLowerCase();if((t.overrideFeature&&t.overrideFeature!==`null`?t.overrideFeature:null)===`common`)return`common.${n}`;let r=(e.confirmedFeature||``).trim().toLowerCase(),i=(e.confirmedScreen||``).trim().toLowerCase(),a=r||(e.frameName||`unknown`).toLowerCase().replace(/\s+/g,`_`);return`${i&&i!==a?`${a}.${i}`:a}.${n}`}var p,m,h=e((()=>{p=`You are a localization expert analyzing UI text layers in a Figma design.
+Classify each layer as one of:
+- "normal": Static UI copy needing a localization key (labels, buttons, headings, error messages)
+- "partial": Mix of static template text AND runtime data (e.g. "Welcome, {name}" or "Last seen {time} ago")
+- "dynamic": Entirely runtime values — no key needed (user names, counts, device names, timestamps)
+
+Respond with JSON object: {"data": [{"nodeId": "...", "classification": "normal|partial|dynamic"}]}`,m=`You are a localization key naming expert.
+
+The FEATURE and SCREEN segments of the key are already decided by the designer and provided per layer.
+Do NOT change or ignore them. Your ONLY job is to suggest the remaining segments:
+  semantic (REQUIRED) + element (optional) + type (optional)
+
+Convention reminder: {feature}.[screen].{semantic}.[element].[type]
+
+SEMANTIC values (the content or state):
+  - States: success, error, warning, fail, loading, empty
+  - Content: email, password, phone, otp, terms, privacy, name, permission, biometric
+  - Or descriptive: speed, heart_rate, location_error, safe, title, subtitle, etc.
+
+ELEMENT values (UI component type — use if clearly identifiable):
+  button, input, tab, nav, card, modal, toast, banner, badge, chip, list,
+  header, footer, section, link, toggle, label, avatar
+
+TYPE values (copy role within the element — use if clearly identifiable):
+  title, subtitle, description, placeholder, hint, label, textlink, loading
+
+== SHARED STRING RULE ==
+If the layer is inside a navigation bar, tab bar, or represents a shared action (Done, Cancel, Back, Save),
+override the feature to "common" regardless of what the designer provided:
+  common.tab.home  common.done.button  common.nav.back
+
+== OUTPUT FORMAT ==
+Return ONLY the suffix segments (not the full key). The prefix is prepended automatically.
+Examples:
+  Layer: "Speed", feature: "home" → suffix: "speed.card.label"
+  Layer: "Home" (in tab bar) → suffix: "tab.home"  (override feature to common)
+  Layer: "Cancel" (shared CTA) → suffix: "cancel"   (override feature to common)
+
+Respond with JSON object:
+{"data": [{"nodeId": "...", "suffix": "semantic" or "semantic.element" or "semantic.element.type", "overrideFeature": "common or null"}]}`}));t((()=>{o(),h();var e=document.getElementById(`app`),t=null,r={unnamedLayers:[],namedLayers:[],hiddenLayerKeys:[],skippedLayers:[],groupedLayers:[],frames:[],confirmedIds:new Set,duplicateIds:new Set,stats:{written:0,skipped:0,dynamic:0}},i=`S5`,u=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a1 1 0 0 1 .97.757l.524 2.094a7.03 7.03 0 0 1 1.734.716l1.89-1.134a1 1 0 0 1 1.22.153l1.414 1.414a1 1 0 0 1 .153 1.22l-1.134 1.89a7.03 7.03 0 0 1 .716 1.734l2.094.524a1 1 0 0 1 .757.97v2a1 1 0 0 1-.757.97l-2.094.524a7.03 7.03 0 0 1-.716 1.734l1.134 1.89a1 1 0 0 1-.153 1.22l-1.414 1.414a1 1 0 0 1-1.22.153l-1.89-1.134a7.03 7.03 0 0 1-1.734.716l-.524 2.094A1 1 0 0 1 12 22h-2a1 1 0 0 1-.97-.757l-.524-2.094a7.03 7.03 0 0 1-1.734-.716l-1.89 1.134a1 1 0 0 1-1.22-.153L2.248 17.9a1 1 0 0 1-.153-1.22l1.134-1.89a7.03 7.03 0 0 1-.716-1.734L.419 12.53A1 1 0 0 1-.338 12v-2a1 1 0 0 1 .757-.97l2.094-.524a7.03 7.03 0 0 1 .716-1.734L2.095 4.882a1 1 0 0 1 .153-1.22L3.662 2.248a1 1 0 0 1 1.22-.153l1.89 1.134a7.03 7.03 0 0 1 1.734-.716L9.03 0.419A1 1 0 0 1 10-.338h2ZM11 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" fill="currentColor"/></svg>`;function d(e){parent.postMessage({pluginMessage:e},`*`)}window.onmessage=async e=>{let n=e.data.pluginMessage;if(n)switch(n.type){case`SETTINGS_LOADED`:t=n.settings,!t||!t.apiKey?m(`S1`):m(`S2`);break;case`SELECTION_CHANGED`:if([`S1`,`S5`,`S6`,`S7`,`S8`,`S9`].includes(i))return;n.hasSelection?(r.isFragment=n.isFragment,r.fragments=n.fragments,r.layerCount=n.layerCount,n.isFragment?m(`S4`):m(`S3`)):m(`S2`);break;case`SCAN_RESULT`:r.unnamedLayers=n.unnamedLayers,r.namedLayers=n.namedLayers,r.hiddenLayerKeys=n.hiddenLayerKeys,r.skippedLayers=n.skippedLayers,r.frames=n.frames,r.stats={written:0,skipped:r.skippedLayers.length,dynamic:0},r.unnamedLayers.length===0&&r.namedLayers.length>0?m(`S8`):r.unnamedLayers.length===0?m(`S2`):m(`S3b`);break;case`PROGRESS_UPDATE`:let e=document.getElementById(`loading-phase`),a=document.getElementById(`loading-progress`);e&&(e.innerText=n.phase),a&&(a.innerText=n.progress);break;case`ERROR`:v(`Error occurred`,n.message);break;case`WRITE_CONFIRMED`:r.stats.written++,r.confirmedIds.add(n.nodeId);let o=document.getElementById(`row-${n.nodeId}`);if(o){o.classList.add(`confirmed`);let e=o.querySelector(`.confirm-btn`);e&&(e.textContent=`✅`,e.disabled=!0);let t=o.querySelector(`.skip-btn`);t&&(t.disabled=!0);let n=o.querySelector(`.dict-ghost-container`);n&&(n.style.display=`block`)}b();break}};async function p(){m(`S5`);let e=document.getElementById(`loading-phase`);try{e.innerText=`Classifying layers...`;let n=r.unnamedLayers.filter(e=>!e.isCommonMatch);if(n.length>0){let e=await c(n,t.provider,t.apiKey),r=new Map;n.forEach(e=>r.set(e.nodeId,e)),e.forEach(e=>{let t=e.nodeId||e.id,n=r.get(t);n&&(n.classification=e.classification)})}let i=n.filter(e=>e.classification===`normal`||e.classification===`partial`);r.stats.dynamic=n.length-i.length,i.length>0&&(e.innerText=`Suggesting keys...`,(await l(i,t.provider,t.apiKey)).forEach(e=>{let t=e.nodeId||e.id,n=i.find(e=>e.nodeId===t);n&&(n.suggestedKey=f(n,e))}));let o=new Map;r.unnamedLayers.forEach(e=>{e.suggestedKey&&(o.has(e.suggestedKey)||o.set(e.suggestedKey,[]),o.get(e.suggestedKey).push(e))}),o.forEach(e=>{e.length<2||e.forEach(e=>{let t=e.text.toLowerCase().replace(/[^a-z0-9\s]/g,``).trim().replace(/\s+/g,`_`).substring(0,24);t&&(e.suggestedKey=`${e.suggestedKey}_${t}`)})}),r.duplicateIds=a(r.unnamedLayers.filter(e=>e.suggestedKey).map(e=>({nodeId:e.nodeId,key:e.suggestedKey})),r.hiddenLayerKeys);let s=new Map;r.unnamedLayers.forEach(e=>{s.has(e.text)||s.set(e.text,[]),s.get(e.text).push(e)}),r.groupedLayers=[],s.forEach((e,t)=>{e.length>1?r.groupedLayers.push({text:t,layers:e,isGroup:!0,suggestedKey:e[0].suggestedKey,isCommonMatch:e[0].isCommonMatch}):r.groupedLayers.push({...e[0],isGroup:!1})}),m(`S6`)}catch(e){v(`AI Failure`,e.message)}}function m(t){i=t,e.innerHTML=g(t),y(t)}function g(e){let n=`<div class="header"><h1>✨ AINaming</h1>${`<button class="icon-btn" id="settings-btn">${u}</button>`}</div>`;switch(e){case`S1`:return`
+        <div class="header" style="justify-content:space-between;">
+          ${t?`<button class="icon-btn" id="back-btn" title="Go back" style="font-size:18px; line-height:1; color:var(--text-muted);">&#8592;</button>`:`<div style="width:28px;"></div>`}
+          <h1>Settings</h1>
+          <div style="width:28px;"></div>
+        </div>
+        <div class="container">
+          <div class="card">
+            <div class="card-title">API Configuration</div>
+            <p class="card-meta">Connect your own API key to enable AI suggestions.</p>
+            <div style="margin-top:16px;">
+              <select id="provider" style="width:100%; padding:10px; background:#252525; border:1px solid var(--border-color); color:white; border-radius:6px; margin-bottom:12px;">
+                <option value="openai" ${t?.provider===`openai`?`selected`:``}>OpenAI &mdash; GPT-4o</option>
+                <option value="anthropic" ${t?.provider===`anthropic`?`selected`:``}>Anthropic &mdash; Claude</option>
+              </select>
+              <input type="password" id="api-key" placeholder="Paste API Key (sk-...)" value="${t?.apiKey||``}" />
+              <div id="api-error" style="color:var(--danger-color); font-size:10px; margin-top:8px; display:none;">Invalid key format</div>
+            </div>
+            <button id="save-btn" class="btn-primary" style="width:100%; margin-top:8px;" ${t?.apiKey?``:`disabled`}>Verify &amp; Save</button>
+            <p style="font-size:10px; color:var(--text-muted); text-align:center; margin-top:12px;">&#128274; Keys are stored locally on your machine.</p>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title">COMMON KEY DICTIONARY</div>
+            <p class="card-meta">Exact match text bypasses AI and uses these keys.</p>
+            
+            <table style="width:100%; font-size:11px; margin-top:12px; border-collapse: collapse;">
+              <thead>
+                <tr style="text-align:left; border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                  <th style="padding-bottom:6px; width:45%;">Text (exact)</th>
+                  <th style="padding-bottom:6px; width:50%;">Key</th>
+                  <th style="padding-bottom:6px; width:5%;"></th>
+                </tr>
+              </thead>
+              <tbody id="dict-table-body">
+                ${t?.dictionary?.map((e,t)=>`
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:8px 0;">${e.text}</td>
+                    <td style="padding:8px 0; font-family:var(--font-mono); color:var(--primary-color);">${e.key}</td>
+                    <td style="padding:8px 0; text-align:right;">
+                      <button class="icon-btn delete-dict-btn" data-idx="${t}" style="color:var(--danger-color); padding:0;">🗑</button>
+                    </td>
+                  </tr>
+                `).join(``)||`<tr><td colspan="3" style="padding:8px 0; color:var(--text-muted);">Empty</td></tr>`}
+              </tbody>
+            </table>
+
+            <div style="display:flex; gap:8px; margin-top:12px; align-items:flex-start;">
+              <div style="flex:1;"><input type="text" id="new-dict-text" placeholder="e.g. secure" style="padding:6px 8px; font-size:11px;"></div>
+              <div style="flex:1;"><input type="text" id="new-dict-key" placeholder="common.secure.badge" style="padding:6px 8px; font-size:11px; font-family:var(--font-mono);"></div>
+              <button id="add-dict-btn" class="btn-primary" style="padding:6px 10px;">Add</button>
+            </div>
+            <div id="dict-error" style="color:var(--danger-color); font-size:10px; margin-top:4px;"></div>
+          </div>
+          <div style="height:24px;"></div>
+        </div>
+      `;case`S2`:return`${n}<div class="container full-height empty-state"><div style="font-size:40px; margin-bottom:16px;">🔍</div><h3>Ready to scan</h3><p>Select a frame or section in Figma to see layers.</p></div>`;case`S3`:return`
+        ${n}
+        <div class="container" style="gap:12px; flex-grow:0;">
+          <div class="card">
+             <div class="card-title">Selection detected</div>
+             <p class="card-meta">${r.layerCount} text layers identified</p>
+          </div>
+          <button id="run-btn" class="btn-primary" style="width:100%; margin-top:4px;" ${t?``:`disabled`}>${t?`▶ Run AI Naming`:`Add API key in Settings to run`}</button>
+        </div>
+      `;case`S3b`:{let e=r.frames.length===1;return`
+        <div class="header">
+          <button class="icon-btn" id="back-btn" style="font-size:18px; color:var(--text-muted);">&#8592;</button>
+          <h1>${e?`Confirm feature`:`Confirm frames`}</h1>
+          <div style="width:28px;"></div>
+        </div>
+        <div class="container">
+          <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">
+            ${e?`Confirm the feature. Screen is optional. AI fills semantic, element, and type.`:`Each frame may belong to a different feature. Confirm or edit below.`}
+          </p>
+          ${r.frames.map(e=>`
+            <div class="card" style="padding:12px;">
+              <div class="card-title" style="font-size:11px; margin-bottom:8px;">&#128250; ${e.frameName}</div>
+              <div style="display:flex; gap:8px;">
+                <div style="flex:1;">
+                  <div style="font-size:9px; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em;">Feature <span style="color:var(--danger-color)">*</span></div>
+                  <input type="text" class="feature-input" data-frame-id="${e.frameId}"
+                    value="${e.suggestedFeature}" placeholder="e.g. home, auth, settings">
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:9px; color:var(--text-muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em;">Screen <span style="color:var(--text-muted)">(opt.)</span></div>
+                  <input type="text" class="screen-input" data-frame-id="${e.frameId}"
+                    value="${e.suggestedScreen||``}" placeholder="e.g. signin, feed">
+                </div>
+              </div>
+            </div>
+          `).join(``)}
+          <div style="background:rgba(24,160,251,0.08); border:1px solid rgba(24,160,251,0.2); border-radius:8px; padding:10px; margin-top:4px;">
+            <p style="font-size:10px; color:var(--text-muted); line-height:1.6;">
+              &#128274; Feature + screen are locked as prefix. AI only fills <b style="color:var(--text-color)">semantic &bull; element &bull; type</b>.
+            </p>
+          </div>
+          <button id="run-ai-btn" class="btn-primary" style="width:100%; margin-top:8px;">&#9654; Run AI Naming</button>
+        </div>
+      `}case`S4`:return`
+        <div class="header"><h1>Fragments</h1></div>
+        <div class="container">
+           <div class="card" style="background: rgba(255,205,41,0.1); border-color: var(--warning-color);">
+              <div class="card-title" style="color: var(--warning-color);">Heuristic Warning</div>
+              <p style="font-size:11px;">Found ${r.fragments.length} frames that look like components. Scanning them might result in duplicate keys across the system.</p>
+           </div>
+           <button id="skip-run-btn" class="btn-primary" style="margin-bottom:8px">Skip Fragments & Run</button>
+           <button id="scan-all-btn" class="btn-secondary">Scan Everything</button>
+        </div>
+      `;case`S5`:return`
+        <div class="container full-height empty-state" style="justify-content:center;">
+           <div class="loading-spinner"></div>
+           <h3 id="loading-phase">Processing...</h3>
+           <p id="loading-progress" style="margin-top:8px; color:var(--text-muted);"></p>
+        </div>
+      `;case`S6`:return _();case`S7`:return`
+        <div class="container full-height empty-state" style="justify-content:center; align-items:center;">
+           <div style="font-size:48px; margin-bottom:12px;">✅</div>
+           <h2 style="margin-bottom:20px;">Done!</h2>
+           <div style="background:var(--surface-color); border:1px solid var(--border-color); border-radius:10px; padding:16px; width:200px; margin-bottom:24px;">
+              <div style="display:flex; justify-content:space-between; padding: 4px 0; border-bottom:1px solid var(--border-color); margin-bottom:8px;"><span style="color:var(--text-muted)">Written</span> <b style="color:var(--success-color)">${r.stats.written}</b></div>
+              <div style="display:flex; justify-content:space-between; padding: 4px 0; border-bottom:1px solid var(--border-color); margin-bottom:8px;"><span style="color:var(--text-muted)">Skipped</span> <b>${r.stats.skipped}</b></div>
+              <div style="display:flex; justify-content:space-between; padding: 4px 0;"><span style="color:var(--text-muted)">Dynamic</span> <b>${r.stats.dynamic}</b></div>
+           </div>
+           <button class="btn-primary" id="reset-btn" style="width:200px;">Process another frame</button>
+           <button class="btn-secondary" id="close-btn" style="width:200px; margin-top:8px;">Finish</button>
+        </div>
+      `;case`S8`:return`
+         <div class="header"><h1>Review List</h1></div>
+         <div class="container">
+            <div class="card" style="background: rgba(27,196,125,0.1); border-color: var(--success-color);">
+               <div class="card-title" style="color: var(--success-color);">All valid</div>
+               <p style="font-size:11px;">All layers in this selection already follow the naming convention.</p>
+            </div>
+            <div class="section-header">Existing Keys</div>
+            <div style="flex:1; overflow-y: auto;">
+              ${r.namedLayers.map(e=>`
+                <div class="item-row focusable-row" data-id="${e.nodeId}" style="cursor:pointer;">
+                  <div class="row-top">
+                    <div class="layer-name">${e.text}</div>
+                    <div class="context-tag" style="font-size:9px; color:var(--text-muted);">Click to focus</div>
+                  </div>
+                  <div class="context-tag" style="font-family:monospace; font-size:10px; color:var(--primary-color); margin-top:2px;">${e.layerName}</div>
+                </div>
+              `).join(``)}
+            </div>
+            <button class="btn-primary" id="reset-btn" style="margin-top:16px; width:100%;">Done</button>
+         </div>
+      `;default:return``}}function _(){let e=[],t=[];r.groupedLayers.forEach(i=>{if(i.isGroup)t.push(i);else{let a=r.duplicateIds.has(i.nodeId)?`Duplicate`:i.suggestedKey?n(i.suggestedKey).error:null;a?(i.error=a,e.push(i)):t.push(i)}});let i=e=>{if(e.isGroup)return`
+         <div class="item-row group-row">
+            <div class="row-top">
+               <div class="layer-name" style="color: var(--primary-color)">${e.text}</div>
+               <div style="display:flex; gap:6px; align-items:center;">
+                  ${e.isCommonMatch?`<span class="badge common-badge" style="background:rgba(24,160,251,0.1); color:var(--primary-color); border-color:transparent;">🔵 Common</span>`:``}
+                  <div class="badge badge-grey group-expand-toggle" style="cursor:pointer; display:flex; align-items:center; gap:4px; user-select:none;">
+                     ${e.layers.length} layers share this <span class="chevron" style="font-size:8px;">▼</span>
+                  </div>
+               </div>
+            </div>
+            <div class="group-expand-list" style="display:none; margin:8px 0; background:rgba(255,255,255,0.05); border-radius:4px; padding:8px;">
+               ${e.layers.map(e=>`
+                 <div style="font-size:10px; color:var(--text-muted); padding:2px 0;">
+                    <span style="font-family:var(--font-mono);">${e.parentComponentName||e.layerName}</span> 
+                    <span style="opacity:0.5; margin-left:4px;">${e.frameName||``}</span>
+                 </div>
+               `).join(``)}
+            </div>
+            <div class="input-container">
+               <input type="text" class="key-input group-input" value="${e.suggestedKey||``}" placeholder="Key for all matching layers">
+            </div>
+            <div class="row-footer" style="flex-wrap:wrap;">
+               <div style="flex:1;"></div>
+               <button class="action-link group-confirm">Confirm all</button>
+               <button class="action-link secondary group-skip">Skip all</button>
+               ${e.suggestedKey&&!e.isCommonMatch?`
+                 <div class="dict-ghost-container" style="width:100%; border-top:1px dashed var(--border-color); margin-top:8px; padding-top:8px; text-align:right; display:none;">
+                   <button class="action-link secondary add-dict-ghost" data-text="${e.text.replace(/"/g,`&quot;`)}" data-key="${e.suggestedKey}">+ Add "${e.text.length>20?e.text.substring(0,20)+`...`:e.text}" &rarr; common.*</button>
+                 </div>
+               `:``}
+            </div>
+         </div>
+       `;let t=e.classification===`dynamic`,n=r.confirmedIds.has(e.nodeId);return`
+      <div class="item-row${n?` confirmed`:``}" id="row-${e.nodeId}" data-id="${e.nodeId}">
+        <div class="row-top">
+          <div class="layer-name">${e.text}</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+             ${e.isCommonMatch?`<span class="badge common-badge" style="background:rgba(24,160,251,0.1); color:var(--primary-color); border-color:transparent;">🔵 Common</span>`:``}
+             <div class="context-tag">${e.frameName||``}</div>
+          </div>
+        </div>
+        <div class="input-container">
+          <input type="text" class="key-input" value="${e.suggestedKey||``}" placeholder="${t?`No key needed`:`Suggested key`}" ${n?`disabled`:``}>
+          <div style="margin-top:6px; display:flex; gap:6px;">
+            ${e.error&&!n?`<span class="badge badge-red">${e.error}</span>`:``}
+            ${n?`<span style="color:var(--success-color); font-size:10px;">✅ Applied</span>`:``}
+            ${t&&!n?`<span class="badge badge-grey">Dynamic</span>`:``}
+            ${e.classification===`partial`&&!n?`<span class="badge badge-orange">Partial</span>`:``}
+          </div>
+        </div>
+        <div class="row-footer" style="flex-wrap:wrap;">
+           <div style="flex:1;"></div>
+           <button class="action-link confirm-btn" ${n||!e.suggestedKey&&!t?`disabled`:``}>${n?`✅`:`Confirm`}</button>
+           <button class="action-link secondary skip-btn" ${n?`disabled`:``}>Skip</button>
+           ${e.suggestedKey&&!e.isCommonMatch?`
+             <div class="dict-ghost-container" style="width:100%; border-top:1px dashed var(--border-color); margin-top:8px; padding-top:8px; text-align:right; display:${n?`block`:`none`};">
+               <button class="action-link secondary add-dict-ghost" data-text="${e.text.replace(/"/g,`&quot;`)}" data-key="${e.suggestedKey}">+ Add "${e.text.length>20?e.text.substring(0,20)+`...`:e.text}" &rarr; common.*</button>
+             </div>
+           `:``}
+        </div>
+      </div>
+    `};return`
+    <div class="header"><h1>Review suggestions</h1> <span class="badge badge-grey" style="font-size:10px">${e.length+t.length} remaining</span></div>
+    <div class="container" style="padding:0 16px 16px 16px;">
+       ${e.length>0?`<div class="section-header">Critical Issues</div>${e.map(i).join(``)}`:``}
+       <div class="section-header">Suggestions</div>
+       ${t.map(i).join(``)}
+       
+       <div class="section-header" style="cursor:pointer" id="toggle-skipped">🔘 Skipped (${r.skippedLayers.length})</div>
+       <div id="skipped-list" style="display:none;">
+          ${r.skippedLayers.map(e=>`
+            <div class="item-row" style="opacity:0.6"><div class="row-top"><div class="layer-name">${e.text}</div><button class="action-link unskip-btn" data-id="${e.nodeId}">Unskip</button></div></div>
+          `).join(``)}
+       </div>
+    </div>
+    <div class="footer-actions">
+       <button class="btn-secondary" id="reset-btn">New Scan</button>
+       <button class="btn-primary" id="finish-btn">Done</button>
+    </div>
+  `}function v(t,n){i=`S9`,e.innerHTML=`
+    <div class="container empty-state">
+       <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+       <h2 style="color:var(--danger-color)">${t}</h2>
+       <p style="margin-top:8px">${n}</p>
+       <button class="btn-primary" style="margin-top:32px" id="retry-btn">Back to Selection</button>
+    </div>
+  `,document.getElementById(`retry-btn`)?.addEventListener(`click`,()=>m(`S2`))}function y(a){if(a===`S1`){let r=document.getElementById(`provider`),i=document.getElementById(`api-key`),a=document.getElementById(`save-btn`),o=document.getElementById(`api-error`);t&&t.dictionary||t&&(t.dictionary=[]),i.addEventListener(`input`,()=>{let e=i.value.trim(),t=r.value===`openai`?e.startsWith(`sk-`)&&e.length>20:e.startsWith(`sk-ant-`)&&e.length>20;a.disabled=!t,o.style.display=e&&!t?`block`:`none`}),a.addEventListener(`click`,async()=>{a.innerText=`Verifying...`,await s(r.value,i.value)?(t?(t.apiKey=i.value,t.provider=r.value):t={apiKey:i.value,provider:r.value,dictionary:[]},d({type:`SAVE_SETTINGS`,settings:t}),d({type:`SCAN_REQUEST`,scanAll:!1})):(a.innerText=`Verify & Save`,o.innerText=`Key verification failed.`,o.style.display=`block`)});let c=document.getElementById(`new-dict-text`),l=document.getElementById(`new-dict-key`),u=document.getElementById(`add-dict-btn`),f=document.getElementById(`dict-error`);c&&l&&u&&u.addEventListener(`click`,()=>{let e=c.value.trim().toLowerCase(),r=l.value.trim().toLowerCase();if(f.innerText=``,!e||!r)return;if(!r.startsWith(`common.`)){f.innerText=`Dictionary keys must start with common.`;return}let i=n(r);if(!i.valid){f.innerText=i.error;return}t||={apiKey:``,provider:`openai`,dictionary:[]},t.dictionary||=[];let a=t.dictionary.findIndex(t=>t.text===e);if(a!==-1){f.innerText=`This text is already mapped to ${t.dictionary[a].key}.`;return}t.dictionary.push({text:e,key:r}),d({type:`SAVE_SETTINGS`,settings:t}),m(`S1`)}),e.querySelectorAll(`.delete-dict-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let n=parseInt(e.getAttribute(`data-idx`),10);t&&t.dictionary&&(t.dictionary.splice(n,1),d({type:`SAVE_SETTINGS`,settings:t}),m(`S1`))})})}if(document.getElementById(`back-btn`)?.addEventListener(`click`,()=>{m(i===`S1`?t?`S2`:`S1`:i===`S3b`?`S3`:`S2`)}),document.getElementById(`settings-btn`)?.addEventListener(`click`,()=>m(`S1`)),a===`S3`&&document.getElementById(`run-btn`)?.addEventListener(`click`,()=>d({type:`SCAN_REQUEST`,scanAll:!1})),a===`S3b`&&document.getElementById(`run-ai-btn`)?.addEventListener(`click`,async()=>{let t=e.querySelectorAll(`.feature-input`),n=!1;if(t.forEach(e=>{e.value.trim()?e.style.borderColor=``:(e.style.borderColor=`var(--danger-color)`,e.placeholder=`Feature is required!`,n=!0)}),n)return;let i=new Map;t.forEach(e=>{let t=e.getAttribute(`data-frame-id`),n=e.value.trim().toLowerCase().replace(/\s+/g,`_`);i.set(t,{feature:n,screen:null})}),e.querySelectorAll(`.screen-input`).forEach(e=>{let t=e.getAttribute(`data-frame-id`),n=e.value.trim().toLowerCase().replace(/\s+/g,`_`)||null,r=i.get(t);r&&(r.screen=n)}),r.unnamedLayers.forEach(e=>{let t=e.frameId?i.get(e.frameId):null;if(t)e.confirmedFeature=t.feature,e.confirmedScreen=t.screen;else{let t=[...i.values()][0];e.confirmedFeature=t?.feature||r.frames[0]?.suggestedFeature||`unknown`,e.confirmedScreen=t?.screen||null}}),await p()}),a===`S4`&&(document.getElementById(`skip-run-btn`)?.addEventListener(`click`,()=>d({type:`SCAN_REQUEST`,scanAll:!1})),document.getElementById(`scan-all-btn`)?.addEventListener(`click`,()=>d({type:`SCAN_REQUEST`,scanAll:!0}))),a===`S6`){e.querySelectorAll(`.item-row[data-id]`).forEach(e=>{e.addEventListener(`click`,t=>{if(t.target.closest(`button`)||t.target.closest(`input`))return;let n=e.getAttribute(`data-id`);n&&d({type:`FOCUS_LAYER`,nodeId:n})}),e.style.cursor=`pointer`}),e.querySelectorAll(`.key-input`).forEach(e=>{e.addEventListener(`input`,()=>{let t=e.closest(`.item-row`).querySelector(`.common-badge`);t&&!e.value.startsWith(`common.`)?t.style.display=`none`:t&&(t.style.display=`inline-block`)})}),e.querySelectorAll(`.confirm-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.closest(`.item-row`),n=t.getAttribute(`data-id`),r=t.querySelector(`input`).value;n&&d({type:`WRITE_KEY`,nodeId:n,key:r})})}),e.querySelectorAll(`.add-dict-ghost`).forEach(e=>{e.addEventListener(`click`,()=>{let r=e.closest(`.dict-ghost-container`),i=e.getAttribute(`data-text`).toLowerCase().trim(),a=e.getAttribute(`data-key`),o=a.split(`.`);o.length>1?(o[0]=`common`,a=o.join(`.`)):a=`common.`+a,r.innerHTML=`
+            <div style="display:flex; gap:4px; align-items:center; width:100%;">
+               <span style="font-size:10px; color:var(--text-muted);">Text: <b>${i}</b> &rarr;</span>
+               <input type="text" class="inline-dict-key-input" value="${a}" style="flex:1; padding:4px 6px; font-size:10px; font-family:var(--font-mono); border:1px solid var(--border-color); border-radius:4px; background:#2A2A2A; color:white;">
+               <button class="action-link confirm-inline-dict" style="color:var(--success-color);">Save</button>
+            </div>
+            <div class="inline-dict-err" style="color:var(--danger-color); font-size:9px; text-align:left; margin-top:4px;"></div>
+          `,r.querySelector(`.confirm-inline-dict`).addEventListener(`click`,()=>{let e=r.querySelector(`.inline-dict-key-input`).value.trim().toLowerCase(),a=r.querySelector(`.inline-dict-err`);if(!e.startsWith(`common.`)){a.innerText=`Must start with common.`;return}let o=n(e);if(!o.valid){a.innerText=o.error;return}if(d({type:`ADD_DICTIONARY_ENTRY`,entry:{text:i,key:e}}),r.innerHTML=`<span style="color:var(--success-color); font-size:10px;">✅ Added to dictionary</span>`,t){t.dictionary||=[];let n=t.dictionary.findIndex(e=>e.text===i);n>-1?t.dictionary[n]={text:i,key:e}:t.dictionary.push({text:i,key:e})}})})}),e.querySelectorAll(`.skip-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.closest(`.item-row`),n=t?.getAttribute(`data-id`);if(!n)return;r.stats.skipped++,d({type:`SKIP_LAYER`,nodeId:n});let i=r.groupedLayers.findIndex(e=>!e.isGroup&&e.nodeId===n);if(i>-1){let[e]=r.groupedLayers.splice(i,1);r.skippedLayers.push(e)}t.style.transition=`opacity 0.2s ease`,t.style.opacity=`0`,setTimeout(()=>t.remove(),200);let o=document.getElementById(`skipped-list`),s=r.skippedLayers[r.skippedLayers.length-1];if(o&&s){let e=document.createElement(`div`);e.className=`item-row`,e.style.opacity=`0.6`,e.innerHTML=`
+              <div class="row-top">
+                <div class="layer-name">${s.text}</div>
+                <button class="action-link unskip-btn" data-id="${n}">Unskip</button>
+              </div>`,o.appendChild(e),e.querySelector(`.unskip-btn`)?.addEventListener(`click`,()=>{a(n,e)})}let c=document.getElementById(`toggle-skipped`);c&&(c.textContent=`🔘 Skipped (${r.skippedLayers.length})`),o&&o.style.display===`none`&&(o.style.display=`block`),b()})});function a(t,n){d({type:`UNSKIP_LAYER`,nodeId:t});let i=r.skippedLayers.findIndex(e=>e.nodeId===t);if(i>-1){let[e]=r.skippedLayers.splice(i,1);e.suggestedKey=``,r.groupedLayers.push({...e,isGroup:!1}),r.stats.skipped=Math.max(0,r.stats.skipped-1)}n.style.transition=`opacity 0.2s ease`,n.style.opacity=`0`,setTimeout(()=>{n.remove();let e=document.getElementById(`toggle-skipped`);e&&(e.textContent=`🔘 Skipped (${r.skippedLayers.length})`)},200);let a=r.groupedLayers[r.groupedLayers.length-1],o=e.querySelector(`.container`);if(a&&o){let e=document.createElement(`div`);e.className=`item-row`,e.id=`row-${a.nodeId}`,e.setAttribute(`data-id`,a.nodeId),e.style.cursor=`pointer`,e.style.opacity=`0`,e.innerHTML=`
+           <div class="row-top">
+             <div class="layer-name">${a.text}</div>
+             <div class="context-tag">${a.frameName||``}</div>
+           </div>
+           <div class="input-container">
+             <input type="text" class="key-input" value="" placeholder="Key needed">
+           </div>
+           <div class="row-footer">
+             <button class="action-link confirm-btn" disabled>Confirm</button>
+             <button class="action-link secondary skip-btn">Skip</button>
+           </div>`;let t=document.getElementById(`toggle-skipped`);t?o.insertBefore(e,t):o.appendChild(e),requestAnimationFrame(()=>{e.style.transition=`opacity 0.2s ease`,e.style.opacity=`1`}),e.querySelector(`.skip-btn`)?.addEventListener(`click`,()=>{e.getAttribute(`data-id`),e.querySelector(`.skip-btn`).dispatchEvent(new Event(`_internal_skip`))})}}e.querySelectorAll(`.unskip-btn`).forEach(e=>{e.addEventListener(`click`,()=>{a(e.getAttribute(`data-id`),e.closest(`.item-row`))})}),document.getElementById(`toggle-skipped`)?.addEventListener(`click`,()=>{let e=document.getElementById(`skipped-list`);e.style.display=e.style.display===`none`?`block`:`none`}),e.querySelectorAll(`.group-expand-toggle`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.closest(`.group-row`).querySelector(`.group-expand-list`),r=e.querySelector(`.chevron`);n.style.display===`none`?(n.style.display=`block`,r.innerText=`▲`):(n.style.display=`none`,r.innerText=`▼`)})}),e.querySelectorAll(`.group-confirm`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.closest(`.group-row`),n=t.querySelector(`input`).value,i=r.groupedLayers.find(e=>e.text===t.querySelector(`.layer-name`).innerText);if(i&&n){i.layers.forEach(e=>d({type:`WRITE_KEY`,nodeId:e.nodeId,key:n}));let r=t.querySelector(`input`);r&&(r.disabled=!0),e.innerText=`Confirmed All`,e.disabled=!0;let a=t.querySelector(`.group-skip`);a&&(a.disabled=!0);let o=t.querySelector(`.dict-ghost-container`);o&&(o.style.display=`block`)}})}),e.querySelectorAll(`.group-skip`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.closest(`.group-row`),n=t.querySelector(`.layer-name`),i=r.groupedLayers.find(e=>e.text===n.innerText);i&&(i.layers.forEach(e=>{r.stats.skipped++,d({type:`SKIP_LAYER`,nodeId:e.nodeId})}),t.style.transition=`opacity 0.2s ease`,t.style.opacity=`0`,setTimeout(()=>{t.remove(),r.skippedLayers.push(i);let e=document.getElementById(`skipped-list`);if(e){let t=document.createElement(`div`);t.className=`item-row`,t.style.opacity=`0.6`,t.innerHTML=`
+                      <div class="row-top">
+                        <div class="layer-name">${i.text}</div>
+                        <div class="badge badge-grey">${i.layers.length} layers</div>
+                      </div>`,e.appendChild(t)}let n=document.getElementById(`toggle-skipped`);if(n){let e=0;r.skippedLayers.forEach(t=>{t.isGroup?e+=t.layers.length:e+=1}),n.innerText=`🔘 Skipped (${e})`}},200))})}),document.getElementById(`reset-btn`)?.addEventListener(`click`,()=>{r.confirmedIds=new Set,r.groupedLayers=[],r.skippedLayers=[],i=`S2`,m(`S2`)}),document.getElementById(`finish-btn`)?.addEventListener(`click`,()=>{let t=r.confirmedIds,n=new Set(r.skippedLayers.map(e=>e.nodeId)),i=r.groupedLayers.filter(e=>e.isGroup?!0:!t.has(e.nodeId)&&!n.has(e.nodeId));i.length>0?confirm(`Apply ${i.length} remaining suggestion(s) and finish?`)&&(i.forEach(t=>{if(t.isGroup){let n=e.querySelector(`[data-group-text] input`);n?.value&&t.layers.forEach(e=>d({type:`WRITE_KEY`,nodeId:e.nodeId,key:n.value}))}else{let n=e.querySelector(`#row-${t.nodeId} input`);n?.value&&d({type:`WRITE_KEY`,nodeId:t.nodeId,key:n.value})}}),m(`S7`)):m(`S7`)})}(a===`S7`||a===`S8`)&&(e.querySelectorAll(`.focusable-row`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.getAttribute(`data-id`);t&&d({type:`FOCUS_LAYER`,nodeId:t})})}),document.getElementById(`reset-btn`)?.addEventListener(`click`,()=>{i=`S2`,d({type:`GET_SETTINGS`})}),document.getElementById(`close-btn`)?.addEventListener(`click`,()=>d({type:`CLOSE_PLUGIN`})))}function b(){if(i!==`S6`)return;let e=r.confirmedIds,t=new Set(r.skippedLayers.map(e=>e.nodeId));r.groupedLayers.filter(n=>n.isGroup?!0:!e.has(n.nodeId)&&!t.has(n.nodeId)).length===0&&m(`S7`)}setTimeout(()=>d({type:`GET_SETTINGS`}),100)}))();</script>
+  <style rel="stylesheet" crossorigin>:root{--bg-color:#121212;--surface-color:#1e1e1e;--surface-hover:#2c2c2c;--text-color:#fff;--text-muted:#bbb;--border-color:#333;--primary-color:#18a0fb;--primary-hover:#0783d6;--danger-color:#f24822;--warning-color:#ffcd29;--success-color:#1bc47d;--font-family:"Inter", sans-serif;--header-height:48px}*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--font-family);color:var(--text-color);background-color:var(--bg-color);height:100vh;font-size:11px;overflow:hidden}#app{flex-direction:column;height:100%;display:flex}.container{flex-direction:column;gap:8px;padding:16px;display:flex;overflow-y:auto}.container.full-height{flex:1}.header{height:var(--header-height);border-bottom:1px solid var(--border-color);background:var(--bg-color);z-index:10;justify-content:space-between;align-items:center;padding:0 16px;display:flex;position:sticky;top:0}.header h1{align-items:center;gap:8px;font-size:13px;font-weight:600;display:flex}.icon-btn{cursor:pointer;color:var(--text-muted);background:0 0;border:none;border-radius:4px;justify-content:center;align-items:center;padding:4px;display:flex}.icon-btn:hover{background:var(--surface-hover);color:var(--text-color)}.screen{flex:1;overflow-y:auto}.card{background:var(--surface-color);border:1px solid var(--border-color);border-radius:12px;margin-bottom:12px;padding:16px}.card-title{margin-bottom:8px;font-size:14px;font-weight:600}.card-meta{color:var(--text-muted);font-size:11px}.section-header{text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);justify-content:space-between;align-items:center;padding:24px 0 8px;font-size:11px;font-weight:600;display:flex}.item-row{background:var(--surface-color);border:1px solid var(--border-color);border-radius:8px;margin-bottom:8px;padding:12px;transition:border-color .15s}.item-row:hover{border-color:#ffb43273}.item-row.confirmed{opacity:.6;pointer-events:none;border-color:#1bc47d59}.row-top{justify-content:space-between;margin-bottom:8px;display:flex}.layer-name{white-space:nowrap;text-overflow:ellipsis;max-width:154px;font-weight:600;overflow:hidden}.context-tag{color:var(--text-muted);font-size:10px}.input-container{margin-bottom:8px;position:relative}input{border:1px solid var(--border-color);width:100%;color:var(--text-color);background:#252525;border-radius:6px;padding:8px 12px;font-family:inherit;font-size:11px}input:focus{border-color:var(--primary-color);box-shadow:0 0 0 1px var(--primary-color);outline:none}input::placeholder{color:#555}.row-footer{justify-content:flex-start;gap:12px;display:flex}.action-link{color:var(--primary-color);cursor:pointer;background:0 0;border:none;font-size:11px;font-weight:500}.action-link:hover{text-decoration:underline}.action-link.secondary{color:var(--text-muted)}.action-link:disabled{opacity:.3;cursor:not-allowed}.badge{border-radius:4px;padding:2px 6px;font-size:9px;font-weight:600}.badge-orange{color:#ffcd29;background:#3e2900}.badge-red{color:#f24822;background:#3e1000}.badge-grey{color:var(--text-muted);background:#2a2a2a}.footer-actions{border-top:1px solid var(--border-color);background:var(--bg-color);gap:12px;padding:16px;display:flex}.btn-primary{background:var(--primary-color);color:#fff;cursor:pointer;border:none;border-radius:6px;padding:10px 16px;font-family:inherit;font-size:12px;font-weight:600}.btn-primary:hover{background:var(--primary-hover)}.btn-secondary{background:var(--surface-color);color:var(--text-color);border:1px solid var(--border-color);cursor:pointer;border-radius:6px;padding:10px 16px;font-family:inherit;font-size:12px;font-weight:600}.btn-secondary:hover{background:var(--surface-hover)}.footer-actions .btn-primary,.footer-actions .btn-secondary{flex:1}@keyframes fadeIn{0%{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}.item-row{animation:.2s ease-out fadeIn}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:0 0}::-webkit-scrollbar-thumb{background:#333;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#444}.empty-state{text-align:center;color:var(--text-muted);flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;display:flex}
+/*$vite$:1*/</style>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>

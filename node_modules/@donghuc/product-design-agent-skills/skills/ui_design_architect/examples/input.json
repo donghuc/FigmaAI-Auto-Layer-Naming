@@ -1,0 +1,16 @@
+{
+  "skill": "ui_design_architect",
+  "inputs": {
+    "ui_spec_guideline": "Reference to safenest_ui_spec.md",
+    "product_foundation": {
+      "ux_strategy": "Zero-setup onboarding, high trust, mobile-first protection.",
+      "product_principles": "Clarity over Cleverness, Actionable Alerts"
+    },
+    "project_context": {
+      "feature": "Scan Progress Screen",
+      "platform": "Mobile Web",
+      "user_goal": "See that the scan is happening and feel confident in the thoroughness of the check."
+    },
+    "task_description": "Build a screen that shows the progress of a link check scan. Include a percentage, a status message, and a security-themed animation placeholder."
+  }
+}

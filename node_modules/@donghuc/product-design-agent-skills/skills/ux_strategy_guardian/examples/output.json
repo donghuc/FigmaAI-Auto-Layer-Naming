@@ -1,0 +1,24 @@
+{
+  "strategy_alignment": "WARNING",
+  "issues_found": [
+    {
+      "description": "The results page states the risk but offers no actionable next step for the user.",
+      "violated_rule": "Actionable Alerts",
+      "severity": "high"
+    },
+    {
+      "description": "The original URL that was scanned is not displayed, which lacks context.",
+      "violated_rule": "Clarity over Cleverness / Context",
+      "severity": "medium"
+    }
+  ],
+  "recommendations": [
+    "Add a clear, primary action button like 'Go Back to Safety' at the bottom of the report.",
+    "Explicitly display the queried URL near the top of the Results Report for confirmation."
+  ],
+  "constraints_for_next_iteration": [
+    "Ensure 'AlertCard' component from SafeNest is used for the action buttons.",
+    "Do not use technical jargon for the button text."
+  ],
+  "strategy_confidence_score": 75
+}

@@ -1,0 +1,12 @@
+{
+  "skill": "validation_simulation_agent",
+  "inputs": {
+    "ux_flow": "Users start on a family dashboard, click 'Add Device', scan a QR code on a second device, and then grant 3 permissions (Location, Push, MDM).",
+    "target_users": "Non-technical parents and children",
+    "critical_scenarios": ["Code scan failure", "Permission denied", "Interrupted setup"],
+    "project_foundation": {
+      "strategy": "High-Trust, Minimal Friction Onboarding",
+      "principles": ["Clarity", "Supportive Narratives"]
+    }
+  }
+}

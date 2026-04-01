@@ -1,0 +1,11 @@
+{
+  "skill": "concept_exploration_orchestrator",
+  "inputs": {
+    "problem_statement": "The core problem is the 'Visibility Gap' during device onboarding, where a device is physically present but not yet protected, causing user anxiety.",
+    "project_foundation": {
+      "strategy": "Maximum Transparency, High Trust Onboarding",
+      "principles": ["Clarity over Cleverness", "Zero-Latency Feedback"],
+      "privacy_constraints": ["User-approved scan only", "No device data access before link"]
+    }
+  }
+}

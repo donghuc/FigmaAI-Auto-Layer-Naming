@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "@donghuc/product-design-agent-skills": "github:donghuc/product-design-agent-skills-"
+  },
+  "name": "ainaming",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.124.0",
+    "@types/node": "^25.5.0",
+    "esbuild": "^0.27.4",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3",
+    "vite-plugin-singlefile": "^2.3.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build && esbuild src/main/code.ts --bundle --target=es2015 --outfile=src/main/code.js",
+    "dev": "vite build --watch & esbuild src/main/code.ts --bundle --target=es2015 --outfile=src/main/code.js --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

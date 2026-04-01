@@ -1,0 +1,7 @@
+{
+  "skill": "reference_benchmark_collector",
+  "inputs": {
+    "feature_description": "We need a way for parents to grant remote permission to their kid's device install request without blocking the kid entirely.",
+    "industry": "Family Safety, Device Management"
+  }
+}

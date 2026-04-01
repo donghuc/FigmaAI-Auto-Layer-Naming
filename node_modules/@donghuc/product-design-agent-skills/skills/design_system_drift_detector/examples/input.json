@@ -1,0 +1,7 @@
+{
+  "skill": "design_system_drift_detector",
+  "inputs": {
+    "ui_spec_artifact": "Primary: #00FF00, Spacing: factors of 8",
+    "built_nodes": {"button_1": {"fill": "#01FE00", "padding": "15px"}}
+  }
+}

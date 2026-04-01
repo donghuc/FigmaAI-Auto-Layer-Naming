@@ -1,0 +1,8 @@
+{
+  "skill": "product_design_workflow_orchestrator",
+  "inputs": {
+    "user_intent": "I am starting a new project for a 'Family Remote Permission' feature. Please guide me.",
+    "current_phase": "Phase 1",
+    "handoff_schema": null
+  }
+}

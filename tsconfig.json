@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "esnext",
+    "strict": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
+  },
+  "include": ["src/ui/**/*", "src/shared/**/*"]
+}

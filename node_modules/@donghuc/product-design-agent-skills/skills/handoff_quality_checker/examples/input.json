@@ -1,0 +1,7 @@
+{
+  "skill": "handoff_quality_checker",
+  "inputs": {
+    "handoff_checklist": ["All 4 states designed", "Motion duration specified", "SVG assets linked"],
+    "design_package": "Design has Happy Path and Error state. No motion documented."
+  }
+}

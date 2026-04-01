@@ -1,0 +1,11 @@
+{
+  "skill": "problem_framing_orchestrator",
+  "inputs": {
+    "initial_idea": "I want a new way for users to check if a link is dangerous in the SafeNest app.",
+    "project_foundation": {
+      "strategy": "Privacy-first safety for low-income families",
+      "principles": ["Trust", "Clarity", "Consent"],
+      "privacy_constraints": ["No persistent URL logging", "User-approved scan only"]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "skill": "heuristic_ui_auditor",
+  "inputs": {
+    "design_data": "Reference to screenshot or node JSON",
+    "custom_focus": "Prioritize high-impact accessibility for mobile",
+    "ruleset_filter": ["accessibility", "hierarchy"]
+  }
+}

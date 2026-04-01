@@ -1,0 +1,21 @@
+{
+  "name": "@donghuc/product-design-agent-skills",
+  "version": "1.0.0",
+  "description": "AI Agent skills for product design workflows",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/donghuc/product-design-agent-skills-.git"
+  },
+  "files": [
+    "skills"
+  ],
+  "keywords": [
+    "ai",
+    "agents",
+    "ux",
+    "design",
+    "skills"
+  ],
+  "author": "donghuc",
+  "license": "MIT"
+}

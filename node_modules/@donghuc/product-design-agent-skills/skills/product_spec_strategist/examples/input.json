@@ -1,0 +1,11 @@
+{
+  "skill": "product_spec_strategist",
+  "inputs": {
+    "raw_product_spec": "We need an 'Alert History' feature for SafeNest. Users should be able to see past threats, who was affected, and if the threat was resolved. It needs to feel very secure and professional.",
+    "target_platform": "Mobile Web",
+    "project_foundation": {
+      "ux_strategy": "Clarity over Cleverness, Maximum Transparency",
+      "principles": ["High Trust", "Actionable Information"]
+    }
+  }
+}

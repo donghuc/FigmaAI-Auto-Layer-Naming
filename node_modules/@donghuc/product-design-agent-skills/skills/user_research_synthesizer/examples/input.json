@@ -1,0 +1,7 @@
+{
+  "skill": "user_research_synthesizer",
+  "inputs": {
+    "raw_data": "[User A]: I hate when the app asks for my location permissions again when I just gave it yesterday. It makes me trust it less. [User B]: The family setup is too complex. Why can't I just send a link to my wife?",
+    "research_goals": "Find friction points in the onboarding flow."
+  }
+}

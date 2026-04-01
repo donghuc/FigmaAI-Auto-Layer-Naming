@@ -1,0 +1,7 @@
+{
+  "skill": "content_copy_strategist",
+  "inputs": {
+    "ui_architecture": {"states": ["error_network", "empty_dashboard"]},
+    "brand_voice_guidelines": "SafeNest Voice: Empathetic, clear, never alarming. Never use words like 'Failed' or 'Forbidden'."
+  }
+}
