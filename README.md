@@ -70,5 +70,6 @@ MIT License. See [LICENSE](LICENSE) for details.
 ---
 
 ## 🔗 Links
-- [User Guide](https://donghuc.github.io/FigmaAI-Auto-Layer-Naming/guide)
-- [Terms of Service](https://donghuc.github.io/FigmaAI-Auto-Layer-Naming/terms)
+- [User Guide](https://donghuc.github.io/FigmaAI-Auto-Layer-Naming/guide.html)
+- [Terms of Service](https://donghuc.github.io/FigmaAI-Auto-Layer-Naming/terms.html)
+- [Walkthrough](https://donghuc.github.io/FigmaAI-Auto-Layer-Naming/WALKTHROUGH.html)
