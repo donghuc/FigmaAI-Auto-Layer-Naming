@@ -27,7 +27,7 @@
   // src/main/code.ts
   var require_code = __commonJS({
     "src/main/code.ts"(exports) {
-      figma.showUI(__html__, { width: 320, height: 600, themeColors: true });
+      figma.showUI(__html__, { width: 450, height: 600, themeColors: true });
       function isValidKey(name) {
         return /^[a-z0-9_]+\.[a-z0-9_]+/.test(name);
       }

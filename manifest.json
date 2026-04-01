@@ -1,6 +1,6 @@
 {
   "name": "AINaming",
-  "id": "11111111",
+  "id": "1621080061364961357",
   "api": "1.0.0",
   "main": "src/main/code.js",
   "ui": "dist/ui.html",
@@ -11,5 +11,6 @@
       "https://api.anthropic.com"
     ]
   },
+  "documentAccess": "dynamic-page",
   "editorType": ["figma"]
 }
