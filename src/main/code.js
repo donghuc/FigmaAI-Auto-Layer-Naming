@@ -54,11 +54,51 @@
           const provider = (yield figma.clientStorage.getAsync("provider")) || "openai";
           const rawDict = figma.root.getPluginData("common_dictionary");
           const dictionary = rawDict ? JSON.parse(rawDict) : [
-            { text: "done", key: "common.done.button" },
+            { text: "confirm", key: "common.confirm.button" },
             { text: "cancel", key: "common.cancel.button" },
+            { text: "save", key: "common.save.button" },
+            { text: "next", key: "common.next.button" },
             { text: "back", key: "common.back.button" },
-            { text: "ok", key: "common.ok.button" },
-            { text: "close", key: "common.close.button" }
+            { text: "done", key: "common.done.button" },
+            { text: "skip", key: "common.skip.action" },
+            { text: "retry", key: "common.retry.button" },
+            { text: "close", key: "common.close.button" },
+            { text: "edit", key: "common.edit.button" },
+            { text: "delete", key: "common.delete.button" },
+            { text: "remove", key: "common.remove.button" },
+            { text: "share", key: "common.share.button" },
+            { text: "submit", key: "common.submit.button" },
+            { text: "continue", key: "common.continue.button" },
+            { text: "got it", key: "common.got_it.button" },
+            { text: "add", key: "common.add.button" },
+            { text: "create", key: "common.create.button" },
+            { text: "update", key: "common.update.button" },
+            { text: "clear", key: "common.clear.button" },
+            { text: "reset", key: "common.reset.button" },
+            { text: "apply", key: "common.apply.button" },
+            { text: "dismiss", key: "common.dismiss.button" },
+            { text: "try again", key: "common.try_again.button" },
+            { text: "turn on", key: "common.turn_on.button" },
+            { text: "turn off", key: "common.turn_off.button" },
+            { text: "review", key: "common.review.button" },
+            { text: "learn more", key: "common.learn_more.button" },
+            { text: "view all", key: "common.view_all.button" },
+            { text: "see details", key: "common.see_details.button" },
+            { text: "show less", key: "common.show_less.button" },
+            { text: "show more", key: "common.show_more.button" },
+            { text: "accept", key: "common.accept.button" },
+            { text: "decline", key: "common.decline.button" },
+            { text: "allow", key: "common.allow.button" },
+            { text: "sign in", key: "common.sign_in.button" },
+            { text: "sign out", key: "common.sign_out.button" },
+            { text: "safe", key: "common.status.safe.label" },
+            { text: "risky", key: "common.status.risky.label" },
+            { text: "dangerous", key: "common.status.dangerous.label" },
+            { text: "unknown", key: "common.status.unknown.label" },
+            { text: "offline", key: "common.status.offline.label" },
+            { text: "active", key: "common.status.active.label" },
+            { text: "completed", key: "common.status.completed.label" },
+            { text: "expired", key: "common.status.expired.label" }
           ];
           figma.ui.postMessage({
             type: "SETTINGS_LOADED",
@@ -73,11 +113,51 @@
         } else if (msg.type === "ADD_DICTIONARY_ENTRY") {
           const rawDict = figma.root.getPluginData("common_dictionary");
           const dictionary = rawDict ? JSON.parse(rawDict) : [
-            { text: "done", key: "common.done.button" },
+            { text: "confirm", key: "common.confirm.button" },
             { text: "cancel", key: "common.cancel.button" },
+            { text: "save", key: "common.save.button" },
+            { text: "next", key: "common.next.button" },
             { text: "back", key: "common.back.button" },
-            { text: "ok", key: "common.ok.button" },
-            { text: "close", key: "common.close.button" }
+            { text: "done", key: "common.done.button" },
+            { text: "skip", key: "common.skip.action" },
+            { text: "retry", key: "common.retry.button" },
+            { text: "close", key: "common.close.button" },
+            { text: "edit", key: "common.edit.button" },
+            { text: "delete", key: "common.delete.button" },
+            { text: "remove", key: "common.remove.button" },
+            { text: "share", key: "common.share.button" },
+            { text: "submit", key: "common.submit.button" },
+            { text: "continue", key: "common.continue.button" },
+            { text: "got it", key: "common.got_it.button" },
+            { text: "add", key: "common.add.button" },
+            { text: "create", key: "common.create.button" },
+            { text: "update", key: "common.update.button" },
+            { text: "clear", key: "common.clear.button" },
+            { text: "reset", key: "common.reset.button" },
+            { text: "apply", key: "common.apply.button" },
+            { text: "dismiss", key: "common.dismiss.button" },
+            { text: "try again", key: "common.try_again.button" },
+            { text: "turn on", key: "common.turn_on.button" },
+            { text: "turn off", key: "common.turn_off.button" },
+            { text: "review", key: "common.review.button" },
+            { text: "learn more", key: "common.learn_more.button" },
+            { text: "view all", key: "common.view_all.button" },
+            { text: "see details", key: "common.see_details.button" },
+            { text: "show less", key: "common.show_less.button" },
+            { text: "show more", key: "common.show_more.button" },
+            { text: "accept", key: "common.accept.button" },
+            { text: "decline", key: "common.decline.button" },
+            { text: "allow", key: "common.allow.button" },
+            { text: "sign in", key: "common.sign_in.button" },
+            { text: "sign out", key: "common.sign_out.button" },
+            { text: "safe", key: "common.status.safe.label" },
+            { text: "risky", key: "common.status.risky.label" },
+            { text: "dangerous", key: "common.status.dangerous.label" },
+            { text: "unknown", key: "common.status.unknown.label" },
+            { text: "offline", key: "common.status.offline.label" },
+            { text: "active", key: "common.status.active.label" },
+            { text: "completed", key: "common.status.completed.label" },
+            { text: "expired", key: "common.status.expired.label" }
           ];
           const idx = dictionary.findIndex((e) => e.text === msg.entry.text);
           if (idx >= 0) {
@@ -87,26 +167,33 @@
           }
           figma.root.setPluginData("common_dictionary", JSON.stringify(dictionary));
         } else if (msg.type === "WRITE_KEY") {
-          const node = figma.getNodeById(msg.nodeId);
+          const node = yield figma.getNodeByIdAsync(msg.nodeId);
           if (node) {
             node.name = msg.key;
             figma.ui.postMessage({ type: "WRITE_CONFIRMED", nodeId: msg.nodeId });
           }
         } else if (msg.type === "SKIP_LAYER") {
-          const node = figma.getNodeById(msg.nodeId);
+          const node = yield figma.getNodeByIdAsync(msg.nodeId);
           if (node) {
             node.setPluginData("l10n_skip", "true");
           }
         } else if (msg.type === "UNSKIP_LAYER") {
-          const node = figma.getNodeById(msg.nodeId);
+          const node = yield figma.getNodeByIdAsync(msg.nodeId);
           if (node) {
             node.setPluginData("l10n_skip", "");
           }
         } else if (msg.type === "FOCUS_LAYER") {
-          const node = figma.getNodeById(msg.nodeId);
+          const node = yield figma.getNodeByIdAsync(msg.nodeId);
           if (node) {
-            figma.currentPage.selection = [node];
-            figma.viewport.scrollAndZoomIntoView([node]);
+            try {
+              figma.currentPage.selection = [node];
+            } catch (e) {
+            }
+            try {
+              figma.viewport.scrollAndZoomIntoView([node]);
+            } catch (e) {
+              figma.notify("Could not zoom to layer (it may be hidden)");
+            }
           }
         } else if (msg.type === "RESIZE_UI") {
           figma.ui.resize(msg.width, msg.height);

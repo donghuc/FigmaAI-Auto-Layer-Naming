@@ -135,12 +135,12 @@ body {
 
 .item-row:hover {
   border-color: rgba(255, 180, 50, 0.45);
+  cursor: pointer;
 }
 
 .item-row.confirmed {
   opacity: 0.6;
   border-color: rgba(27, 196, 125, 0.35);
-  pointer-events: none;
 }
 
 .row-top {

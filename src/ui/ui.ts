@@ -354,6 +354,11 @@ function renderScreen(id: string): string {
 
     case 'S8':
       return `
+         <style>
+           .focusable-row:hover { background: rgba(255,255,255,0.05); }
+           .item-row.confirmed { opacity: 0.6; border-color: rgba(27, 196, 125, 0.35); }
+           .item-row.confirmed .confirm-btn, .item-row.confirmed .skip-btn { pointer-events: none; }
+         </style>
          <div class="header"><h1>Review List</h1></div>
          <div class="container">
             <div class="card" style="background: rgba(27,196,125,0.1); border-color: var(--success-color);">
@@ -665,22 +670,22 @@ function attachListeners(id:string) {
 
   if (id === 'S6') {
      // Focus layer on row click (but NOT when clicking inputs or buttons)
-     app.querySelectorAll('.item-row[data-id], .group-row').forEach((row: any) => {
+     app.querySelectorAll('.item-row, .group-row').forEach((row: any) => {
         row.addEventListener('click', (e: any) => {
            if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.group-child-row')) return;
            
            if (row.classList.contains('group-row')) {
-              // For groups, focus ALL matching layers to show breadth
-              const g = scanData.groupedLayers.find((group:any) => group.text === row.querySelector('.layer-name').innerText);
+              // For groups, focus first layer
+              const labelEl = row.querySelector('.layer-name');
+              const g = scanData.groupedLayers.find((group:any) => group.text === labelEl?.innerText);
               if (g && g.layers.length > 0) {
-                 postMessage({ type: 'FOCUS_LAYER', nodeId: g.layers[0].nodeId }); // Focus first one
+                 postMessage({ type: 'FOCUS_LAYER', nodeId: g.layers[0].nodeId });
               }
            } else {
               const nodeId = row.getAttribute('data-id');
               if (nodeId) postMessage({ type: 'FOCUS_LAYER', nodeId });
            }
         });
-        row.style.cursor = 'pointer';
      });
 
      // Focus specific child in a group expand list
@@ -1017,7 +1022,8 @@ function attachListeners(id:string) {
   if (id === 'S7' || id === 'S8') {
     // S8: focus layer on row click
     app.querySelectorAll('.focusable-row').forEach((row: any) => {
-      row.addEventListener('click', () => {
+      row.addEventListener('click', (e: any) => {
+        if (e.target.closest('button')) return;
         const nodeId = row.getAttribute('data-id');
         if (nodeId) postMessage({ type: 'FOCUS_LAYER', nodeId });
       });
