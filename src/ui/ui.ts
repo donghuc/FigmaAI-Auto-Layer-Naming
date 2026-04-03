@@ -529,6 +529,7 @@ function attachListeners(id:string) {
     };
 
     ak.addEventListener('input', validate);
+    pk.addEventListener('change', validate);
     sb.addEventListener('click', async () => {
        sb.innerText = 'Verifying...';
        const ok = await checkApiKey(pk.value as any, ak.value);
