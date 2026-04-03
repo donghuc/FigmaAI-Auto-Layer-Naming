@@ -526,6 +526,7 @@ function attachListeners(id:string) {
        const ok = isAnthropic ? (v.startsWith('sk-ant-') && v.length > 20) : (v.startsWith('sk-') && v.length > 20);
        sb.disabled = !ok;
        er.style.display = (v && !ok) ? 'block' : 'none';
+       if (v && !ok) er.innerText = 'Invalid key format for ' + (isAnthropic ? 'Anthropic' : 'OpenAI/Deepseek');
     };
 
     ak.addEventListener('input', validate);

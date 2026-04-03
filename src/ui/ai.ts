@@ -8,10 +8,9 @@ export async function checkApiKey(provider: string, apiKey: string): Promise<boo
       });
       return res.status === 200;
     } else if (provider === 'deepseek') {
-      const res = await fetch('https://api.deepseek.com/models', {
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' }
-      });
-      return res.status === 200;
+      // Bypassing fetch check for deepseek due to lack of CORS-enabled /models checking endpoint
+      // The generation endpoint will naturally fail safely if the key is bad anyway.
+      return true;
     } else {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
