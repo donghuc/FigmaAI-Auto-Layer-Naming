@@ -218,6 +218,7 @@ function renderScreen(id: string): string {
               <select id="provider" style="width:100%; padding:10px; background:#252525; border:1px solid var(--border-color); color:white; border-radius:6px; margin-bottom:12px;">
                 <option value="openai" ${currentSettings?.provider === 'openai' ? 'selected' : ''}>OpenAI &mdash; GPT-4o</option>
                 <option value="anthropic" ${currentSettings?.provider === 'anthropic' ? 'selected' : ''}>Anthropic &mdash; Claude</option>
+                <option value="deepseek" ${currentSettings?.provider === 'deepseek' ? 'selected' : ''}>Deepseek</option>
               </select>
               <input type="password" id="api-key" placeholder="Paste API Key (sk-...)" value="${currentSettings?.apiKey || ''}" />
               <div id="api-error" style="color:var(--danger-color); font-size:10px; margin-top:8px; display:none;">Invalid key format</div>

@@ -2,8 +2,8 @@
 
 export interface Settings {
   apiKey: string;
-  provider: 'openai' | 'anthropic';
-  dictionary?: CommonDictionaryEntry[];
+  provider: 'openai' | 'anthropic' | 'deepseek';
+  dictionary: { text: string, key: string }[];
 }
 
 export interface CommonDictionaryEntry {

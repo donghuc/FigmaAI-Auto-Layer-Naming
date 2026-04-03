@@ -1,10 +1,15 @@
 import { LayerPayload } from '../shared/messages';
 
-export async function checkApiKey(provider: 'openai' | 'anthropic', apiKey: string): Promise<boolean> {
+export async function checkApiKey(provider: string, apiKey: string): Promise<boolean> {
   try {
     if (provider === 'openai') {
       const res = await fetch('https://api.openai.com/v1/models', {
         headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
+      return res.status === 200;
+    } else if (provider === 'deepseek') {
+      const res = await fetch('https://api.deepseek.com/models', {
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' }
       });
       return res.status === 200;
     } else {
@@ -109,12 +114,15 @@ async function _runBatch(layers: LayerPayload[], provider: string, apiKey: strin
     }}, '*');
 
     try {
-      if (provider === 'openai') {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      if (provider === 'openai' || provider === 'deepseek') {
+        const baseUrl = provider === 'deepseek' ? 'https://api.deepseek.com/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+        const modelName = provider === 'deepseek' ? 'deepseek-chat' : 'gpt-4o';
+        
+        const res = await fetch(baseUrl, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'gpt-4o',
+            model: modelName,
             messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: payload }],
             temperature: 0.1,
             response_format: { type: 'json_object' }
