@@ -522,8 +522,8 @@ function attachListeners(id:string) {
 
     const validate = () => {
        const v = ak.value.trim();
-       const isO = pk.value === 'openai';
-       const ok = isO ? (v.startsWith('sk-') && v.length > 20) : (v.startsWith('sk-ant-') && v.length > 20);
+       const isAnthropic = pk.value === 'anthropic';
+       const ok = isAnthropic ? (v.startsWith('sk-ant-') && v.length > 20) : (v.startsWith('sk-') && v.length > 20);
        sb.disabled = !ok;
        er.style.display = (v && !ok) ? 'block' : 'none';
     };
