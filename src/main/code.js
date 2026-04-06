@@ -40,10 +40,11 @@
         const screen = parts.slice(1).join("_");
         return { feature, screen: screen || null };
       }
-      function isEffectivelyVisible(node) {
+      function isEffectivelyVisibleAndUnlocked(node) {
         let curr = node;
         while (curr && curr.type !== "PAGE") {
           if ("visible" in curr && !curr.visible) return false;
+          if ("locked" in curr && curr.locked) return false;
           curr = curr.parent;
         }
         return true;
@@ -235,7 +236,7 @@
           for (const frame of screenFrames) {
             const allTexts = frame.findAllWithCriteria ? frame.findAllWithCriteria({ types: ["TEXT"] }) : frame.type === "TEXT" ? [frame] : [];
             for (const t of allTexts) {
-              if (isEffectivelyVisible(t)) {
+              if (isEffectivelyVisibleAndUnlocked(t)) {
                 textNodes.push(t);
               } else {
                 hiddenTextNodes.push(t);
@@ -332,7 +333,7 @@
         if (selection.length > 0) {
           for (const node of selection) {
             const nodes = node.findAllWithCriteria ? node.findAllWithCriteria({ types: ["TEXT"] }) : node.type === "TEXT" ? [node] : [];
-            textNodeCount += nodes.filter((t) => isEffectivelyVisible(t) && t.getPluginData("l10n_skip") !== "true").length;
+            textNodeCount += nodes.filter((t) => isEffectivelyVisibleAndUnlocked(t) && t.getPluginData("l10n_skip") !== "true").length;
           }
         }
         let isFragment = false;

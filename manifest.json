@@ -1,10 +1,12 @@
 {
   "name": "AINaming",
-  "id": "1621080061364961357",
+  "id": "1622901441164853401",
   "api": "1.0.0",
   "main": "src/main/code.js",
   "ui": "dist/ui.html",
-  "permissions": ["currentuser"],
+  "permissions": [
+    "currentuser"
+  ],
   "networkAccess": {
     "allowedDomains": [
       "https://api.openai.com",
@@ -13,5 +15,7 @@
     ]
   },
   "documentAccess": "dynamic-page",
-  "editorType": ["figma"]
+  "editorType": [
+    "figma"
+  ]
 }

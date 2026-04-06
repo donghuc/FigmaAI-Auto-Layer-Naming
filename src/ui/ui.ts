@@ -543,7 +543,7 @@ function attachListeners(id:string) {
          }
          postMessage({ type: 'SAVE_SETTINGS', settings: currentSettings });
          // Return home rather than forcibly re-scanning, the user might not want to re-scan yet
-         postMessage({ type: 'SCAN_REQUEST', scanAll: false });
+         switchScreen('S2');
        } else {
          sb.innerText = 'Verify & Save';
          er.innerText = 'Key verification failed.';

@@ -25,11 +25,12 @@ function normalizeFrameName(name: string): { feature: string; screen: string | n
   return { feature, screen: screen || null };
 }
 
-// Check if a node is effectively visible (all ancestors visible)
-function isEffectivelyVisible(node: SceneNode): boolean {
+// Check if a node is effectively visible and unlocked (all ancestors visible and unlocked)
+function isEffectivelyVisibleAndUnlocked(node: SceneNode): boolean {
   let curr: BaseNode | null = node;
   while (curr && curr.type !== 'PAGE') {
     if ('visible' in curr && !curr.visible) return false;
+    if ('locked' in curr && curr.locked) return false;
     curr = curr.parent;
   }
   return true;
@@ -257,7 +258,7 @@ figma.ui.onmessage = async (msg: UIMessage) => {
     for (const frame of screenFrames) {
       const allTexts = (frame as any).findAllWithCriteria ? (frame as any).findAllWithCriteria({ types: ['TEXT'] }) : (frame.type === 'TEXT' ? [frame] : []);
       for (const t of allTexts) {
-        if (isEffectivelyVisible(t)) {
+        if (isEffectivelyVisibleAndUnlocked(t)) {
           textNodes.push(t);
         } else {
           hiddenTextNodes.push(t);
@@ -361,7 +362,7 @@ figma.on('selectionchange', () => {
   if (selection.length > 0) {
      for (const node of selection) {
        const nodes = (node as any).findAllWithCriteria ? (node as any).findAllWithCriteria({ types: ['TEXT'] }) : (node.type === 'TEXT' ? [node] : []);
-       textNodeCount += nodes.filter((t: any) => isEffectivelyVisible(t) && t.getPluginData('l10n_skip') !== 'true').length;
+       textNodeCount += nodes.filter((t: any) => isEffectivelyVisibleAndUnlocked(t) && t.getPluginData('l10n_skip') !== 'true').length;
      }
   }
 
