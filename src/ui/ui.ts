@@ -378,7 +378,10 @@ function renderScreen(id: string): string {
                 </div>
               `).join('')}
             </div>
-            <button class="btn-primary" id="reset-btn" style="margin-top:16px; width:100%;">Done</button>
+            <div style="display:flex; gap:8px; margin-top:16px;">
+              <button class="btn-secondary" id="edit-btn" style="flex:1;">Edit keys</button>
+              <button class="btn-primary" id="reset-btn" style="flex:1;">Done</button>
+            </div>
          </div>
       `;
     default: return '';
@@ -1034,6 +1037,29 @@ function attachListeners(id:string) {
     document.getElementById('reset-btn')?.addEventListener('click', () => {
         uiState = 'S2';
         postMessage({ type: 'GET_SETTINGS' });
+    });
+    document.getElementById('edit-btn')?.addEventListener('click', () => {
+        // Feed the already valid named layers back into the edit funnel
+        scanData.unnamedLayers = scanData.namedLayers.map((l:any) => ({ ...l, suggestedKey: l.layerName }));
+        
+        const groups = new Map();
+        scanData.unnamedLayers.forEach((l: any) => {
+           if (!groups.has(l.text)) groups.set(l.text, []);
+           groups.get(l.text).push(l);
+        });
+        
+        scanData.groupedLayers = [];
+        groups.forEach((list, text) => {
+           if (list.length > 1) {
+              scanData.groupedLayers.push({ text, layers: list, isGroup: true, suggestedKey: list[0].suggestedKey, isCommonMatch: list[0].isCommonMatch });
+           } else {
+              scanData.groupedLayers.push({ ...list[0], isGroup: false });
+           }
+        });
+        
+        scanData.confirmedIds = new Set();
+        uiState = 'S6';
+        switchScreen('S6');
     });
     document.getElementById('close-btn')?.addEventListener('click', () => postMessage({ type: 'CLOSE_PLUGIN' }));
   }
